@@ -75,7 +75,9 @@ function buildVolumeMounts(
     const shouldShadowEnv = fs.existsSync(envFile);
     const projectReadonly = !shouldShadowEnv;
     if (shouldShadowEnv) {
-      logger.warn('Shadowing .env requires a writable project mount; using read-write');
+      logger.warn(
+        'Shadowing .env requires a writable project mount; using read-write',
+      );
     }
     mounts.push({
       hostPath: projectRoot,

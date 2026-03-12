@@ -1,4 +1,4 @@
-import path from "path";
+import path from 'path';
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { EventEmitter } from 'events';
 import { PassThrough } from 'stream';

@@ -108,15 +108,17 @@ export function cleanupOrphans(): void {
     console.log('Cleaning up orphaned containers...');
     const command = `${CONTAINER_RUNTIME_BIN} ps --filter name=nanoclaw- --format '{{.Names}}'`;
     console.log(`Running: ${command}`);
-    const output = execSync(command, { 
-      stdio: ['pipe', 'pipe', 'pipe'], 
+    const output = execSync(command, {
+      stdio: ['pipe', 'pipe', 'pipe'],
       encoding: 'utf-8',
-      timeout: 5000 // 5 second timeout to prevent hanging
+      timeout: 5000, // 5 second timeout to prevent hanging
     });
     console.log('Docker ps command finished.');
-    const orphans = output.trim().split('\n')
+    const orphans = output
+      .trim()
+      .split('\n')
       .filter(Boolean)
-      .filter(name => !name.includes('orchestrator')); // DO NOT kill the orchestrator itself
+      .filter((name) => !name.includes('orchestrator')); // DO NOT kill the orchestrator itself
     console.log(`Found ${orphans.length} orphaned agent containers.`);
     for (const name of orphans) {
       try {
@@ -133,7 +135,10 @@ export function cleanupOrphans(): void {
       );
     }
   } catch (err) {
-    console.log('Error during cleanupOrphans:', err instanceof Error ? err.message : String(err));
+    console.log(
+      'Error during cleanupOrphans:',
+      err instanceof Error ? err.message : String(err),
+    );
     logger.warn({ err }, 'Failed to clean up orphaned containers');
   }
 }

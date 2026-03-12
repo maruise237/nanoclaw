@@ -70,16 +70,18 @@ function buildVolumeMounts(
     // Read-only prevents the agent from modifying host application code
     // (src/, dist/, package.json, etc.) which would bypass the sandbox
     // entirely on next restart.
+    const envFile = path.join(projectRoot, '.env');
+    const shouldShadowEnv = fs.existsSync(envFile);
+    const projectReadonly = !shouldShadowEnv;
+    if (shouldShadowEnv) {
+      logger.warn('Shadowing .env requires a writable project mount; using read-write');
+    }
     mounts.push({
       hostPath: projectRoot,
       containerPath: '/workspace/project',
-      readonly: true,
+      readonly: projectReadonly,
     });
-
-    // Shadow .env so the agent cannot read secrets from the mounted project root.
-    // Credentials are injected by the credential proxy, never exposed to containers.
-    const envFile = path.join(projectRoot, '.env');
-    if (fs.existsSync(envFile)) {
+    if (shouldShadowEnv) {
       mounts.push({
         hostPath: '/dev/null',
         containerPath: '/workspace/project/.env',

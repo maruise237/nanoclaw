@@ -15,16 +15,23 @@ import {
 let db: Database.Database;
 
 function createSchema(database: Database.Database): void {
-  console.log('Running CREATE TABLE statements...');
-  database.exec(`
-    CREATE TABLE IF NOT EXISTS chats (
+  console.log('Enabling WAL mode...');
+  try {
+    database.pragma('journal_mode = WAL');
+    console.log('WAL mode enabled.');
+  } catch (err) {
+    console.warn('Failed to enable WAL mode, continuing anyway:', err);
+  }
+
+  const tables = [
+    `CREATE TABLE IF NOT EXISTS chats (
       jid TEXT PRIMARY KEY,
       name TEXT,
       last_message_time TEXT,
       channel TEXT,
       is_group INTEGER DEFAULT 0
-    );
-    CREATE TABLE IF NOT EXISTS messages (
+    )`,
+    `CREATE TABLE IF NOT EXISTS messages (
       id TEXT,
       chat_jid TEXT,
       sender TEXT,
@@ -35,10 +42,9 @@ function createSchema(database: Database.Database): void {
       is_bot_message INTEGER DEFAULT 0,
       PRIMARY KEY (id, chat_jid),
       FOREIGN KEY (chat_jid) REFERENCES chats(jid)
-    );
-    CREATE INDEX IF NOT EXISTS idx_timestamp ON messages(timestamp);
-
-    CREATE TABLE IF NOT EXISTS scheduled_tasks (
+    )`,
+    `CREATE INDEX IF NOT EXISTS idx_timestamp ON messages(timestamp)`,
+    `CREATE TABLE IF NOT EXISTS scheduled_tasks (
       id TEXT PRIMARY KEY,
       group_folder TEXT NOT NULL,
       chat_jid TEXT NOT NULL,
@@ -50,11 +56,10 @@ function createSchema(database: Database.Database): void {
       last_result TEXT,
       status TEXT DEFAULT 'active',
       created_at TEXT NOT NULL
-    );
-    CREATE INDEX IF NOT EXISTS idx_next_run ON scheduled_tasks(next_run);
-    CREATE INDEX IF NOT EXISTS idx_status ON scheduled_tasks(status);
-
-    CREATE TABLE IF NOT EXISTS task_run_logs (
+    )`,
+    `CREATE INDEX IF NOT EXISTS idx_next_run ON scheduled_tasks(next_run)`,
+    `CREATE INDEX IF NOT EXISTS idx_status ON scheduled_tasks(status)`,
+    `CREATE TABLE IF NOT EXISTS task_run_logs (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       task_id TEXT NOT NULL,
       run_at TEXT NOT NULL,
@@ -63,18 +68,17 @@ function createSchema(database: Database.Database): void {
       result TEXT,
       error TEXT,
       FOREIGN KEY (task_id) REFERENCES scheduled_tasks(id)
-    );
-    CREATE INDEX IF NOT EXISTS idx_task_run_logs ON task_run_logs(task_id, run_at);
-
-    CREATE TABLE IF NOT EXISTS router_state (
+    )`,
+    `CREATE INDEX IF NOT EXISTS idx_task_run_logs ON task_run_logs(task_id, run_at)`,
+    `CREATE TABLE IF NOT EXISTS router_state (
       key TEXT PRIMARY KEY,
       value TEXT NOT NULL
-    );
-    CREATE TABLE IF NOT EXISTS sessions (
+    )`,
+    `CREATE TABLE IF NOT EXISTS sessions (
       group_folder TEXT PRIMARY KEY,
       session_id TEXT NOT NULL
-    );
-    CREATE TABLE IF NOT EXISTS registered_groups (
+    )`,
+    `CREATE TABLE IF NOT EXISTS registered_groups (
       jid TEXT PRIMARY KEY,
       name TEXT NOT NULL,
       folder TEXT NOT NULL UNIQUE,
@@ -82,8 +86,19 @@ function createSchema(database: Database.Database): void {
       added_at TEXT NOT NULL,
       container_config TEXT,
       requires_trigger INTEGER DEFAULT 1
-    );
-  `);
+    )`
+  ];
+
+  for (const [i, sql] of tables.entries()) {
+    console.log(`Executing table/index creation ${i + 1}/${tables.length}...`);
+    try {
+      database.exec(sql);
+    } catch (err) {
+      console.error(`Error executing SQL ${i + 1}:`, err);
+      throw err;
+    }
+  }
+  console.log('Base tables and indexes created.');
 
   // Add context_mode column if it doesn't exist (migration for existing DBs)
   try {

@@ -114,8 +114,10 @@ export function cleanupOrphans(): void {
       timeout: 5000 // 5 second timeout to prevent hanging
     });
     console.log('Docker ps command finished.');
-    const orphans = output.trim().split('\n').filter(Boolean);
-    console.log(`Found ${orphans.length} orphaned containers.`);
+    const orphans = output.trim().split('\n')
+      .filter(Boolean)
+      .filter(name => !name.includes('orchestrator')); // DO NOT kill the orchestrator itself
+    console.log(`Found ${orphans.length} orphaned agent containers.`);
     for (const name of orphans) {
       try {
         console.log(`Stopping container: ${name}`);

@@ -473,6 +473,18 @@ function ensureContainerSystemRunning(): void {
 async function main(): Promise<void> {
   ensureContainerSystemRunning();
   console.log('1. Container system checked');
+
+  // Ensure IPC and data directories exist before anything else
+  if (!fs.existsSync(DATA_DIR)) {
+    console.log(`Creating data directory: ${DATA_DIR}`);
+    fs.mkdirSync(DATA_DIR, { recursive: true });
+  }
+  const ipcDir = path.join(DATA_DIR, 'ipc');
+  if (!fs.existsSync(ipcDir)) {
+    console.log(`Creating IPC directory: ${ipcDir}`);
+    fs.mkdirSync(ipcDir, { recursive: true });
+  }
+
   initDatabase();
   console.log('2. Database initialized');
   loadState();

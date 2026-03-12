@@ -31,5 +31,5 @@ RUN mkdir -p data groups store logs
 # Expose the credential proxy port
 EXPOSE 3001
 
-# Start the orchestrator
-CMD ["npm", "run", "start"]
+# Start the orchestrator directly with node for cleaner logs
+CMD ["node", "dist/index.js"]

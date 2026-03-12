@@ -16,7 +16,7 @@
  * MessageStream/query interface.
  */
 
-import { query, MessageStream } from '@anthropic-ai/claude-code';
+import { query, MessageStream } from '@anthropic-ai/claude-agent-sdk';
 import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';

@@ -1,6 +1,11 @@
 import fs from 'fs';
 import path from 'path';
 
+console.log('--- NANOCLAW ORCHESTRATOR STARTING ---');
+console.log('Timestamp:', new Date().toISOString());
+console.log('Node version:', process.version);
+console.log('Working directory:', process.cwd());
+
 import {
   ASSISTANT_NAME,
   CREDENTIAL_PROXY_PORT,

@@ -429,8 +429,8 @@ async function runQuery(
           command: 'node',
           args: [llmToolsPath],
           env: {
-            OPENROUTER_API_KEY: sdkEnv.OPENROUTER_API_KEY,
-            GROQ_API_KEY: sdkEnv.GROQ_API_KEY,
+            OPENROUTER_API_KEY: sdkEnv.OPENROUTER_API_KEY || '',
+            GROQ_API_KEY: sdkEnv.GROQ_API_KEY || '',
           },
         },
       },

@@ -142,11 +142,25 @@ function createSchema(database: Database.Database): void {
 }
 
 export function initDatabase(): void {
-  const dbPath = path.join(STORE_DIR, 'messages.db');
-  fs.mkdirSync(path.dirname(dbPath), { recursive: true });
-
-  db = new Database(dbPath);
+  const dbDir = DATA_DIR;
+  console.log(`Checking database directory: ${dbDir}`);
+  if (!fs.existsSync(dbDir)) {
+    console.log(`Creating database directory: ${dbDir}`);
+    fs.mkdirSync(dbDir, { recursive: true });
+  }
+  const dbPath = path.join(dbDir, 'nanoclaw.db');
+  console.log(`Opening database at: ${dbPath}`);
+  try {
+    db = new Database(dbPath);
+    console.log('Database opened successfully.');
+  } catch (err) {
+    console.log('FAILED to open database:', err instanceof Error ? err.message : String(err));
+    throw err;
+  }
+  
+  console.log('Initializing schema...');
   createSchema(db);
+  console.log('Schema initialized.');
 
   // Migrate from JSON files if they exist
   migrateJsonState();

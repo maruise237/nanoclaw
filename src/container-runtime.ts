@@ -106,16 +106,22 @@ export function ensureContainerRuntimeRunning(): void {
 export function cleanupOrphans(): void {
   try {
     console.log('Cleaning up orphaned containers...');
-    const output = execSync(
-      `${CONTAINER_RUNTIME_BIN} ps --filter name=nanoclaw- --format '{{.Names}}'`,
-      { stdio: ['pipe', 'pipe', 'pipe'], encoding: 'utf-8' },
-    );
+    const command = `${CONTAINER_RUNTIME_BIN} ps --filter name=nanoclaw- --format '{{.Names}}'`;
+    console.log(`Running: ${command}`);
+    const output = execSync(command, { 
+      stdio: ['pipe', 'pipe', 'pipe'], 
+      encoding: 'utf-8',
+      timeout: 5000 // 5 second timeout to prevent hanging
+    });
+    console.log('Docker ps command finished.');
     const orphans = output.trim().split('\n').filter(Boolean);
+    console.log(`Found ${orphans.length} orphaned containers.`);
     for (const name of orphans) {
       try {
-        execSync(stopContainer(name), { stdio: 'pipe' });
-      } catch {
-        /* already stopped */
+        console.log(`Stopping container: ${name}`);
+        execSync(stopContainer(name), { stdio: 'pipe', timeout: 10000 });
+      } catch (err) {
+        console.log(`Failed to stop ${name} (might already be stopped)`);
       }
     }
     if (orphans.length > 0) {
@@ -125,6 +131,7 @@ export function cleanupOrphans(): void {
       );
     }
   } catch (err) {
+    console.log('Error during cleanupOrphans:', err instanceof Error ? err.message : String(err));
     logger.warn({ err }, 'Failed to clean up orphaned containers');
   }
 }

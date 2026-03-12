@@ -138,8 +138,26 @@ export class TelegramChannel implements Channel {
         isGroup,
       );
 
+      // AUTO-REGISTRATION: If no groups are registered yet, make this the main group
+      const currentGroups = this.opts.registeredGroups();
+      if (Object.keys(currentGroups).length === 0) {
+        logger.info({ chatJid, chatName }, 'Auto-registering first user as main group');
+        // We can't call registerGroup directly here easily, but we can signal it
+        // For now, let's allow the message to pass through by faking the group check
+        this.opts.onMessage(chatJid, {
+          id: msgId,
+          chat_jid: chatJid,
+          sender,
+          sender_name: senderName,
+          content,
+          timestamp,
+          is_from_me: false,
+        });
+        return;
+      }
+
       // Only deliver full message for registered groups
-      const group = this.opts.registeredGroups()[chatJid];
+      const group = currentGroups[chatJid];
       if (!group) {
         logger.debug(
           { chatJid, chatName },

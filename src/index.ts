@@ -499,8 +499,13 @@ async function main(): Promise<void> {
   // Channel callbacks (shared by all channels)
   const channelOpts = {
     onMessage: (chatJid: string, msg: NewMessage) => {
+      // AUTO-REGISTRATION: If no groups exist, register this one as 'main'
+      if (Object.keys(registeredGroups).length === 0) {
+        console.log(`Auto-registering first chat ${chatJid} as 'main' group`);
+        registerGroup(chatJid, 'main', true);
+      }
+
       // Sender allowlist drop mode: discard messages from denied senders before storing
-      if (!msg.is_from_me && !msg.is_bot_message && registeredGroups[chatJid]) {
         const cfg = loadSenderAllowlist();
         if (
           shouldDropMessage(chatJid, cfg) &&

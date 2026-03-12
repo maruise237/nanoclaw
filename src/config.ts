@@ -18,6 +18,7 @@ export const SCHEDULER_POLL_INTERVAL = 60000;
 
 // Absolute paths needed for container mounts
 const PROJECT_ROOT = process.cwd();
+export const HOST_PROJECT_PATH = process.env.HOST_PROJECT_PATH || PROJECT_ROOT;
 const HOME_DIR = process.env.HOME || os.homedir();
 
 // Mount security: allowlist stored OUTSIDE project root, never mounted into containers
@@ -71,3 +72,18 @@ export const TRIGGER_PATTERN = new RegExp(
 // Uses system timezone by default
 export const TIMEZONE =
   process.env.TZ || Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+/**
+ * Translates a local path (inside this orchestrator container) to a path
+ * on the host machine. Used for volume mounts when running Docker-out-of-Docker.
+ */
+export function toHostPath(localPath: string): string {
+  if (HOST_PROJECT_PATH === PROJECT_ROOT) return localPath;
+
+  // Only translate paths that are within the project root.
+  // External paths (like /var/run/docker.sock or /dev/null) should be left alone.
+  if (!localPath.startsWith(PROJECT_ROOT)) return localPath;
+
+  const relative = path.relative(PROJECT_ROOT, localPath);
+  return path.join(HOST_PROJECT_PATH, relative);
+}

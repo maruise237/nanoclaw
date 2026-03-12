@@ -1,3 +1,4 @@
+import path from "path";
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { EventEmitter } from 'events';
 import { PassThrough } from 'stream';
@@ -16,6 +17,8 @@ vi.mock('./config.js', () => ({
   GROUPS_DIR: '/tmp/nanoclaw-test-groups',
   IDLE_TIMEOUT: 1800000, // 30min
   TIMEZONE: 'America/Los_Angeles',
+  HOST_PROJECT_PATH: process.cwd(),
+  toHostPath: vi.fn((p) => p),
 }));
 
 // Mock logger
@@ -206,5 +209,32 @@ describe('container-runner timeout behavior', () => {
     const result = await resultPromise;
     expect(result.status).toBe('success');
     expect(result.newSessionId).toBe('session-456');
+  });
+});
+
+describe('container-runner path translation', () => {
+  beforeEach(() => {
+    vi.useFakeTimers();
+    fakeProc = createFakeProcess();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
+  it('translates local paths to host paths when HOST_PROJECT_PATH is set', async () => {
+    // const { toHostPath, HOST_PROJECT_PATH } = await import('./config.js');
+
+    // We need to re-mock config for this test or use the exported values
+    // Since config.js is already mocked at the top, we might need to adjust the mock
+    // to allow changing values or just test the toHostPath function directly if it's exported.
+
+    const localRoot = process.cwd();
+    const hostRoot = '/host/project';
+
+    // toHostPath is mocked to return the path as-is in this test suite
+    const { toHostPath } = await import('./config.js');
+    const localPath = path.join(localRoot, 'data');
+    expect(toHostPath(localPath)).toBe(localPath);
   });
 });

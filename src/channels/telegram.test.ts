@@ -51,6 +51,10 @@ vi.mock('grammy', () => ({
       this.commandHandlers.set(name, handler);
     }
 
+    use(handler: Handler) {
+      // For testing purposes, we can just record it or ignore it
+    }
+
     on(filter: string, handler: Handler) {
       const existing = this.filterHandlers.get(filter) || [];
       existing.push(handler);

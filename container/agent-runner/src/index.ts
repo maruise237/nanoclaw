@@ -16,7 +16,8 @@
  * MessageStream/query interface.
  */
 
-import { query, MessageStream } from '@anthropic-ai/claude-agent-sdk';
+import * as SDK from '@anthropic-ai/claude-agent-sdk';
+const { query, MessageStream } = SDK as any;
 import * as fs from 'fs';
 import * as path from 'path';
 import { fileURLToPath } from 'url';
@@ -110,8 +111,10 @@ async function waitForIpcMessage(): Promise<string | null> {
  * This ensures Claude knows its own identity even after memory compaction.
  */
 function createPreCompactHook(assistantName: string) {
-  return (content: string) => {
-    return `[IDENTITY: You are ${assistantName}, a personal assistant running on NanoClaw. Always keep this identity in mind.]\n\n${content}`;
+  return (input: any) => {
+    const content = typeof input === 'string' ? input : (input as any).content;
+    const newContent = `[IDENTITY: You are ${assistantName}, a personal assistant running on NanoClaw. Always keep this identity in mind.]\n\n${content}`;
+    return typeof input === 'string' ? newContent : { ...input, content: newContent };
   };
 }
 

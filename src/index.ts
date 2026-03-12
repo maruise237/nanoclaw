@@ -9,6 +9,7 @@ console.log('Working directory:', process.cwd());
 import {
   ASSISTANT_NAME,
   CREDENTIAL_PROXY_PORT,
+  DATA_DIR,
   IDLE_TIMEOUT,
   POLL_INTERVAL,
   TIMEZONE,
@@ -514,7 +515,14 @@ async function main(): Promise<void> {
       // AUTO-REGISTRATION: If no groups exist, register this one as 'main'
       if (Object.keys(registeredGroups).length === 0) {
         console.log(`Auto-registering first chat ${chatJid} as 'main' group`);
-        registerGroup(chatJid, 'main', true);
+        registerGroup(chatJid, {
+          name: chatJid,
+          folder: 'main',
+          trigger: `@${ASSISTANT_NAME}`,
+          added_at: new Date().toISOString(),
+          requiresTrigger: false,
+          isMain: true,
+        });
       }
 
       // Sender allowlist drop mode: discard messages from denied senders before storing

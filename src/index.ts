@@ -594,12 +594,13 @@ async function main(): Promise<void> {
 }
 
 // Guard: only run when executed directly, not when imported by tests
-const isDirectRun =
-  process.argv[1] &&
-  new URL(import.meta.url).pathname ===
-    new URL(`file://${process.argv[1]}`).pathname;
+const isDirectRun = true; // Force run in production/docker
+console.log('isDirectRun:', isDirectRun);
+console.log('process.argv[1]:', process.argv[1]);
+console.log('import.meta.url:', import.meta.url);
 
 if (isDirectRun) {
+  console.log('Calling main()...');
   main().catch((err) => {
     logger.error({ err }, 'Failed to start NanoClaw');
     process.exit(1);

@@ -20,6 +20,7 @@ services:
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
       - OPENROUTER_API_KEY=${OPENROUTER_API_KEY}
       - GROQ_API_KEY=${GROQ_API_KEY}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
       - CREDENTIAL_PROXY_HOST=0.0.0.0
       - DOCKER_HOST=unix:///var/run/docker.sock
     restart: unless-stopped

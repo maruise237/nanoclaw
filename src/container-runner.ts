@@ -192,7 +192,19 @@ function buildVolumeMounts(
     group.folder,
     'agent-runner-src',
   );
-  if (!fs.existsSync(groupAgentRunnerDir) && fs.existsSync(agentRunnerSrc)) {
+  let shouldSyncAgentRunner = false;
+  if (!fs.existsSync(groupAgentRunnerDir)) {
+    fs.mkdirSync(groupAgentRunnerDir, { recursive: true });
+    shouldSyncAgentRunner = true;
+  } else {
+    try {
+      const entries = fs.readdirSync(groupAgentRunnerDir);
+      if (entries.length === 0) shouldSyncAgentRunner = true;
+    } catch {
+      shouldSyncAgentRunner = true;
+    }
+  }
+  if (shouldSyncAgentRunner && fs.existsSync(agentRunnerSrc)) {
     fs.cpSync(agentRunnerSrc, groupAgentRunnerDir, { recursive: true });
   }
   mounts.push({

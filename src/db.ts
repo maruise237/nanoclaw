@@ -15,6 +15,7 @@ import {
 let db: Database.Database;
 
 function createSchema(database: Database.Database): void {
+  console.log('Running CREATE TABLE statements...');
   database.exec(`
     CREATE TABLE IF NOT EXISTS chats (
       jid TEXT PRIMARY KEY,
@@ -86,6 +87,7 @@ function createSchema(database: Database.Database): void {
 
   // Add context_mode column if it doesn't exist (migration for existing DBs)
   try {
+    console.log('Running scheduled_tasks migration...');
     database.exec(
       `ALTER TABLE scheduled_tasks ADD COLUMN context_mode TEXT DEFAULT 'isolated'`,
     );
@@ -95,6 +97,7 @@ function createSchema(database: Database.Database): void {
 
   // Add is_bot_message column if it doesn't exist (migration for existing DBs)
   try {
+    console.log('Running messages migration...');
     database.exec(
       `ALTER TABLE messages ADD COLUMN is_bot_message INTEGER DEFAULT 0`,
     );
@@ -108,6 +111,7 @@ function createSchema(database: Database.Database): void {
 
   // Add is_main column if it doesn't exist (migration for existing DBs)
   try {
+    console.log('Running registered_groups migration...');
     database.exec(
       `ALTER TABLE registered_groups ADD COLUMN is_main INTEGER DEFAULT 0`,
     );
@@ -163,7 +167,9 @@ export function initDatabase(): void {
   console.log('Schema initialized.');
 
   // Migrate from JSON files if they exist
+  console.log('Checking for JSON migrations...');
   migrateJsonState();
+  console.log('JSON migrations checked.');
 }
 
 /** @internal - for tests only. Creates a fresh in-memory database. */

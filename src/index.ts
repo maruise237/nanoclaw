@@ -472,15 +472,18 @@ function ensureContainerSystemRunning(): void {
 
 async function main(): Promise<void> {
   ensureContainerSystemRunning();
+  console.log('1. Container system checked');
   initDatabase();
-  logger.info('Database initialized');
+  console.log('2. Database initialized');
   loadState();
+  console.log('3. State loaded');
 
   // Start credential proxy (containers route API calls through this)
   const proxyServer = await startCredentialProxy(
     CREDENTIAL_PROXY_PORT,
     PROXY_BIND_HOST,
   );
+  console.log('4. Credential proxy started on port', CREDENTIAL_PROXY_PORT);
 
   // Graceful shutdown handlers
   const shutdown = async (signal: string) => {
@@ -527,18 +530,19 @@ async function main(): Promise<void> {
   // Create and connect all registered channels.
   // Each channel self-registers via the barrel import above.
   // Factories return null when credentials are missing, so unconfigured channels are skipped.
-  for (const channelName of getRegisteredChannelNames()) {
+  const names = getRegisteredChannelNames();
+  console.log('5. Registered channel factories found:', names);
+  for (const channelName of names) {
     const factory = getChannelFactory(channelName)!;
     const channel = factory(channelOpts);
     if (!channel) {
-      logger.warn(
-        { channel: channelName },
-        'Channel installed but credentials missing — skipping. Check .env or re-run the channel skill.',
-      );
+      console.warn(`6. Channel ${channelName} credentials missing — skipping.`);
       continue;
     }
     channels.push(channel);
+    console.log(`7. Connecting to ${channelName}...`);
     await channel.connect();
+    console.log(`8. Connected to ${channelName} successfully.`);
   }
   if (channels.length === 0) {
     logger.fatal('No channels connected');

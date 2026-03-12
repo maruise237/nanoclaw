@@ -33,4 +33,5 @@ services:
       dockerfile: Dockerfile
     image: nanoclaw-agent:latest
     restart: "no"
-    command: ["echo", "Agent image built"]
+    entrypoint: ["echo", "Agent image built"]
+    # This service doesn't need to run, just build the image

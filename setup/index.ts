@@ -16,6 +16,10 @@ const STEPS: Record<
   mounts: () => import('./mounts.js'),
   service: () => import('./service.js'),
   verify: () => import('./verify.js'),
+<<<<<<< HEAD
+=======
+  'whatsapp-auth': () => import('./whatsapp-auth.js'),
+>>>>>>> whatsapp/main
 };
 
 async function main(): Promise<void> {

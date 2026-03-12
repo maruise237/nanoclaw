@@ -333,7 +333,10 @@ async function runQuery(
   prompt: string,
   sessionId: string | undefined,
   mcpServerPath: string,
+<<<<<<< HEAD
   llmToolsPath: string,
+=======
+>>>>>>> whatsapp/main
   containerInput: ContainerInput,
   sdkEnv: Record<string, string | undefined>,
   resumeAt?: string,
@@ -497,7 +500,10 @@ async function main(): Promise<void> {
 
   const __dirname = path.dirname(fileURLToPath(import.meta.url));
   const mcpServerPath = path.join(__dirname, 'ipc-mcp-stdio.js');
+<<<<<<< HEAD
   const llmToolsPath = path.join(__dirname, 'llm-mcp-stdio.js');
+=======
+>>>>>>> whatsapp/main
 
   let sessionId = containerInput.sessionId;
   fs.mkdirSync(IPC_INPUT_DIR, { recursive: true });
@@ -522,6 +528,7 @@ async function main(): Promise<void> {
     while (true) {
       log(`Starting query (session: ${sessionId || 'new'}, resumeAt: ${resumeAt || 'latest'})...`);
 
+<<<<<<< HEAD
       const queryResult = await runQuery(
         prompt,
         sessionId,
@@ -531,6 +538,9 @@ async function main(): Promise<void> {
         sdkEnv,
         resumeAt,
       );
+=======
+      const queryResult = await runQuery(prompt, sessionId, mcpServerPath, containerInput, sdkEnv, resumeAt);
+>>>>>>> whatsapp/main
       if (queryResult.newSessionId) {
         sessionId = queryResult.newSessionId;
       }

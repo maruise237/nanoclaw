@@ -245,7 +245,6 @@ function buildContainerArgs(
   if (process.env.GROQ_API_KEY) {
     args.push('-e', `GROQ_API_KEY=${process.env.GROQ_API_KEY}`);
   }
-
   // Runtime-specific args for host gateway resolution
   args.push(...hostGatewayArgs());
 

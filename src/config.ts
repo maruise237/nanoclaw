@@ -1,4 +1,5 @@
 import { execSync } from 'child_process';
+import fs from 'fs';
 import os from 'os';
 import path from 'path';
 
@@ -33,6 +34,27 @@ function detectHostProjectPath(): string {
     ).trim();
     if (output && path.isAbsolute(output)) {
       return output;
+    }
+  } catch {
+    // Ignore errors, fallback to local path
+  }
+
+  try {
+    if (fs.existsSync('/proc/self/mountinfo')) {
+      const mountInfo = fs.readFileSync('/proc/self/mountinfo', 'utf8');
+      for (const line of mountInfo.split('\n')) {
+        if (!line) continue;
+        const parts = line.split(' - ');
+        if (parts.length !== 2) continue;
+        const left = parts[0].trim().split(' ');
+        const right = parts[1].trim().split(' ');
+        const mountPoint = left[4]?.replace(/\\040/g, ' ');
+        if (mountPoint !== PROJECT_ROOT) continue;
+        const source = right[1]?.replace(/\\040/g, ' ');
+        if (source && path.isAbsolute(source)) {
+          return source;
+        }
+      }
     }
   } catch {
     // Ignore errors, fallback to local path

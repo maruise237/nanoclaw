@@ -138,6 +138,16 @@ function createSchema(database: Database.Database): void {
     /* column already exists */
   }
 
+  // Add requires_trigger column if it doesn't exist (migration for existing DBs)
+  try {
+    console.log('Running registered_groups requires_trigger migration...');
+    database.exec(
+      `ALTER TABLE registered_groups ADD COLUMN requires_trigger INTEGER DEFAULT 1`,
+    );
+  } catch {
+    /* column already exists */
+  }
+
   // Add channel and is_group columns if they don't exist (migration for existing DBs)
   try {
     database.exec(`ALTER TABLE chats ADD COLUMN channel TEXT`);

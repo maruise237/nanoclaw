@@ -1,3 +1,4 @@
+import { execSync } from 'child_process';
 import os from 'os';
 import path from 'path';
 
@@ -18,7 +19,30 @@ export const SCHEDULER_POLL_INTERVAL = 60000;
 
 // Absolute paths needed for container mounts
 const PROJECT_ROOT = process.cwd();
-export const HOST_PROJECT_PATH = process.env.HOST_PROJECT_PATH || PROJECT_ROOT;
+
+function detectHostProjectPath(): string {
+  if (process.env.HOST_PROJECT_PATH) return process.env.HOST_PROJECT_PATH;
+
+  // Try to auto-detect if running inside a container with access to Docker socket
+  // (Standard for Docker-out-of-Docker setups like Dokploy/Portainer)
+  try {
+    const hostname = os.hostname();
+    const output = execSync(
+      `docker inspect ${hostname} --format '{{ range .Mounts }}{{ if eq .Destination "/app" }}{{ .Source }}{{ end }}{{ end }}'`,
+      { stdio: ['pipe', 'pipe', 'pipe'], encoding: 'utf8', timeout: 5000 },
+    ).trim();
+    if (output && path.isAbsolute(output)) {
+      return output;
+    }
+  } catch {
+    // Ignore errors, fallback to local path
+  }
+
+  return process.cwd();
+}
+
+export const HOST_PROJECT_PATH = detectHostProjectPath();
+
 const HOME_DIR = process.env.HOME || os.homedir();
 
 // Mount security: allowlist stored OUTSIDE project root, never mounted into containers

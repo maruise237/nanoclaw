@@ -277,6 +277,12 @@ function buildContainerArgs(
 
   for (const mount of mounts) {
     const hostPath = toHostPath(mount.hostPath);
+    if (hostPath !== mount.hostPath) {
+      logger.debug(
+        { local: mount.hostPath, host: hostPath },
+        'Translated volume mount path for DooD',
+      );
+    }
     if (mount.readonly) {
       args.push(...readonlyMountArgs(hostPath, mount.containerPath));
     } else {

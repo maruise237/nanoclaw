@@ -211,8 +211,4 @@ jobs:
               title: `Merge-forward failed for ${failed.length} skill branch(es)`,
               body,
               labels: ['skill-maintenance']
-<<<<<<< HEAD
             });
-=======
-            });
->>>>>>> telegram/main

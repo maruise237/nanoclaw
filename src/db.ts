@@ -86,7 +86,7 @@ function createSchema(database: Database.Database): void {
       added_at TEXT NOT NULL,
       container_config TEXT,
       requires_trigger INTEGER DEFAULT 1
-    )`
+    )`,
   ];
 
   for (const [i, sql] of tables.entries()) {
@@ -173,10 +173,13 @@ export function initDatabase(): void {
     db = new Database(dbPath);
     console.log('Database opened successfully.');
   } catch (err) {
-    console.log('FAILED to open database:', err instanceof Error ? err.message : String(err));
+    console.log(
+      'FAILED to open database:',
+      err instanceof Error ? err.message : String(err),
+    );
     throw err;
   }
-  
+
   console.log('Initializing schema...');
   createSchema(db);
   console.log('Schema initialized.');

@@ -60,33 +60,33 @@ export class TelegramChannel implements Channel {
       },
     });
 
-      // Command to get chat ID (useful for registration)
-      this.bot.command('chatid', (ctx) => {
-        const chatId = ctx.chat.id;
-        const chatType = ctx.chat.type;
-        const chatName =
-          chatType === 'private'
-            ? ctx.from?.first_name || 'Private'
-            : (ctx.chat as any).title || 'Unknown';
+    // Command to get chat ID (useful for registration)
+    this.bot.command('chatid', (ctx) => {
+      const chatId = ctx.chat.id;
+      const chatType = ctx.chat.type;
+      const chatName =
+        chatType === 'private'
+          ? ctx.from?.first_name || 'Private'
+          : (ctx.chat as any).title || 'Unknown';
 
-        ctx.reply(
-          `Chat ID: \`tg:${chatId}\`\nName: ${chatName}\nType: ${chatType}`,
-          { parse_mode: 'Markdown' },
-        );
-      });
+      ctx.reply(
+        `Chat ID: \`tg:${chatId}\`\nName: ${chatName}\nType: ${chatType}`,
+        { parse_mode: 'Markdown' },
+      );
+    });
 
-      // Command to check bot status
-      this.bot.command('ping', (ctx) => {
-        ctx.reply(`${ASSISTANT_NAME} is online.`);
-      });
+    // Command to check bot status
+    this.bot.command('ping', (ctx) => {
+      ctx.reply(`${ASSISTANT_NAME} is online.`);
+    });
 
-      // Middleware to log all incoming updates for debugging
-      this.bot.use(async (ctx, next) => {
-        logger.info({ update: ctx.update }, 'Telegram Update Received');
-        return next();
-      });
+    // Middleware to log all incoming updates for debugging
+    this.bot.use(async (ctx, next) => {
+      logger.info({ update: ctx.update }, 'Telegram Update Received');
+      return next();
+    });
 
-      this.bot.on('message:text', async (ctx) => {
+    this.bot.on('message:text', async (ctx) => {
       // Skip commands
       if (ctx.message.text.startsWith('/')) return;
 
@@ -141,7 +141,10 @@ export class TelegramChannel implements Channel {
       // AUTO-REGISTRATION: If no groups are registered yet, make this the main group
       const currentGroups = this.opts.registeredGroups();
       if (Object.keys(currentGroups).length === 0) {
-        logger.info({ chatJid, chatName }, 'Auto-registering first user as main group');
+        logger.info(
+          { chatJid, chatName },
+          'Auto-registering first user as main group',
+        );
         // We can't call registerGroup directly here easily, but we can signal it
         // For now, let's allow the message to pass through by faking the group check
         this.opts.onMessage(chatJid, {

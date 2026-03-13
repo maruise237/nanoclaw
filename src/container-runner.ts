@@ -15,6 +15,7 @@ import {
   GROUPS_DIR,
   IDLE_TIMEOUT,
   TIMEZONE,
+  toHostPath,
 } from './config.js';
 import { resolveGroupFolderPath, resolveGroupIpcPath } from './group-folder.js';
 import { logger } from './logger.js';
@@ -74,7 +75,9 @@ function buildVolumeMounts(
     const shouldShadowEnv = fs.existsSync(envFile);
     const projectReadonly = !shouldShadowEnv;
     if (shouldShadowEnv) {
-      logger.warn('Shadowing .env requires a writable project mount; using read-write');
+      logger.warn(
+        'Shadowing .env requires a writable project mount; using read-write',
+      );
     }
     mounts.push({
       hostPath: projectRoot,
@@ -273,10 +276,11 @@ function buildContainerArgs(
   }
 
   for (const mount of mounts) {
+    const hostPath = toHostPath(mount.hostPath);
     if (mount.readonly) {
-      args.push(...readonlyMountArgs(mount.hostPath, mount.containerPath));
+      args.push(...readonlyMountArgs(hostPath, mount.containerPath));
     } else {
-      args.push('-v', `${mount.hostPath}:${mount.containerPath}`);
+      args.push('-v', `${hostPath}:${mount.containerPath}`);
     }
   }
 
